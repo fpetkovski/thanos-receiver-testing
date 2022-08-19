@@ -1,0 +1,34 @@
+global:
+  scrape_interval: 15s
+  external_labels:
+    replica: "1"
+
+remote_write:
+- url: http://receiver-2:19291/api/v1/receive
+  headers:
+    THANOS-TENANT: avalanche
+  write_relabel_configs:
+  - source_labels:
+    - job
+    regex: avalanche
+    action: keep
+  - source_labels:
+    - series_id
+    regex: .+
+    action: keep
+
+scrape_configs:
+- job_name: 'prometheus'
+  scrape_interval: 10s
+  static_configs:
+  - targets: [ 'localhost:9090' ]
+
+- job_name: 'avalanche'
+  scrape_interval: 10s
+  static_configs:
+  - targets: [ 'avalanche:9001' ]
+
+- job_name: 'receivers'
+  scrape_interval: 5s
+  static_configs:
+  - targets: [ 'receiver-1:10902', 'receiver-2:10902', 'receiver-3:10902', 'receiver-4:10902', 'receiver-5:10902' ]

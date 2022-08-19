@@ -1,0 +1,127 @@
+version: "2"
+
+services:
+  avalanche:
+    image: "docker.io/prometheuscommunity/avalanche-linux-arm64:main"
+    command:
+      - --metric-count=1
+      - --label-count=2
+      - --series-count=2000
+      - --series-interval=60000
+      - --metric-interval=60000
+#      - --value-interval=60000
+  prometheus:
+    image: prom/prometheus:latest
+    command:
+    - --config.file=/var/prometheus/config.yml
+    - --web.enable-admin-api
+    volumes:
+    - ./config.yml:/var/prometheus/config.yml
+    ports:
+    - "9090:9090"
+
+  receiver-1:
+    image: thanos:latest
+    command:
+    - receive
+    - --grpc-address=0.0.0.0:10901
+    - --receive.local-endpoint=receiver-1:10901
+    - --tsdb.min-block-duration=2m
+    - --tsdb.max-block-duration=2m
+    - --tsdb.retention=5m
+    - --label=replica="1"
+    - --receive.hashrings-algorithm=ketama
+    - --receive.hashrings-file=/var/receive/hashrings.json
+    - --receive.replication-factor=3
+    #    - --objstore.config-file=/var/receive/s3.yml
+    volumes:
+    - ./hashrings.json:/var/receive/hashrings.json
+#    - ./s3.yml:/var/receive/s3.yml
+
+  receiver-2:
+    image: thanos:latest
+    command:
+    - receive
+    - --grpc-address=0.0.0.0:10901
+    - --tsdb.min-block-duration=2m
+    - --tsdb.max-block-duration=2m
+    - --tsdb.retention=5m
+    - --label=replica="2"
+    - --receive.hashrings-algorithm=ketama
+    - --receive.local-endpoint=receiver-2:10901
+    - --receive.hashrings-file=/var/receive/hashrings.json
+    - --receive.replication-factor=3
+    #    - --objstore.config-file=/var/receive/s3.yml
+    volumes:
+    - ./hashrings.json:/var/receive/hashrings.json
+#    - ./s3.yml:/var/receive/s3.yml
+
+  receiver-3:
+    image: thanos:latest
+    command:
+    - receive
+    - --grpc-address=0.0.0.0:10901
+    - --tsdb.min-block-duration=2m
+    - --tsdb.max-block-duration=2m
+    - --tsdb.retention=5m
+    - --label=replica="3"
+    - --receive.hashrings-algorithm=ketama
+    - --receive.local-endpoint=receiver-3:10901
+    - --receive.hashrings-file=/var/receive/hashrings.json
+    - --receive.replication-factor=3
+    #    - --objstore.config-file=/var/receive/s3.yml
+    volumes:
+    - ./hashrings.json:/var/receive/hashrings.json
+#    - ./s3.yml:/var/receive/s3.yml
+
+  receiver-4:
+    image: thanos:latest
+    command:
+    - receive
+    - --grpc-address=0.0.0.0:10901
+    - --tsdb.min-block-duration=2m
+    - --tsdb.max-block-duration=2m
+    - --tsdb.retention=5m
+    - --label=replica="4"
+    - --receive.hashrings-algorithm=ketama
+    - --receive.local-endpoint=receiver-4:10901
+    - --receive.hashrings-file=/var/receive/hashrings.json
+    - --receive.replication-factor=3
+    #    - --objstore.config-file=/var/receive/s3.yml
+    volumes:
+    - ./hashrings.json:/var/receive/hashrings.json
+  #    - ./s3.yml:/var/receive/s3.yml
+
+  receiver-5:
+    image: thanos:latest
+    command:
+    - receive
+    - --grpc-address=0.0.0.0:10901
+    - --tsdb.min-block-duration=2m
+    - --tsdb.max-block-duration=2m
+    - --tsdb.retention=5m
+    - --label=replica="5"
+    - --receive.hashrings-algorithm=ketama
+    - --receive.local-endpoint=receiver-5:10901
+    - --receive.hashrings-file=/var/receive/hashrings.json
+    - --receive.replication-factor=3
+    #    - --objstore.config-file=/var/receive/s3.yml
+    volumes:
+    - ./hashrings.json:/var/receive/hashrings.json
+  #    - ./s3.yml:/var/receive/s3.yml
+
+  query:
+    image: thanos:latest
+    command:
+    - query
+    - --endpoint=receiver-1:10901
+    - --endpoint=receiver-2:10901
+    - --endpoint=receiver-3:10901
+    - --endpoint=receiver-4:10901
+    - --endpoint=receiver-5:10901
+    - --query.replica-label=replica
+    ports:
+    - "10902:10902"
+
+volumes:
+  bucket: {}

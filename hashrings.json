@@ -1,0 +1,13 @@
+[
+  {
+    "hashring": "remote-write",
+    "endpoints": [
+      "receiver-4:10901",
+      "receiver-3:10901",
+      "receiver-1:10901"
+    ],
+    "tenants": [
+      "avalanche"
+    ]
+  }
+]
